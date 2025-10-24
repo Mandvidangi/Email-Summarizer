@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 3, "column": 0}, "map": {"version":3,"sources":[],"names":[],"mappings":"","debugId":null}},
+    {"offset": {"line": 15, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/91930/Desktop/LLM%20Projects/EmailSummarizerApp/email-summarizer/ui/app/page.tsx"],"sourcesContent":["export default function Home() {\n  const api = process.env.NEXT_PUBLIC_API_BASE!;\n  return (\n    <main className=\"min-h-screen flex items-center justify-center\">\n      <div className=\"p-8 rounded-2xl shadow max-w-lg text-center space-y-6\">\n        <h1 className=\"text-3xl font-bold\">Inbox Summarizer</h1>\n        <p className=\"text-gray-600\">Sign in with Google and get concise summaries of your most important emails.</p>\n        <a\n          href={`${api}/auth/google/login`}\n          className=\"inline-block px-4 py-2 rounded-xl bg-black text-white\"\n        >\n          Continue with Google\n        </a>\n      </div>\n    </main>\n  );\n}\n"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,MAAM;IACN,qBACE,8OAAC;QAAK,WAAU;kBACd,cAAA,8OAAC;YAAI,WAAU;;8BACb,8OAAC;oBAAG,WAAU;8BAAqB;;;;;;8BACnC,8OAAC;oBAAE,WAAU;8BAAgB;;;;;;8BAC7B,8OAAC;oBACC,MAAM,GAAG,IAAI,kBAAkB,CAAC;oBAChC,WAAU;8BACX;;;;;;;;;;;;;;;;;AAMT","debugId":null}}]
+}
