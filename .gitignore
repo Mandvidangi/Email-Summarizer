@@ -22,3 +22,8 @@ build/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local data & secrets
+*.db
+EmailSummarizerApp/email-summarizer/.env
+
