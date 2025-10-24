@@ -1,0 +1,282 @@
+# 📧 AI-Powered Email Summarizer (RAG + Agentic AI)
+## Before running the project, create your own .env and Google OAuth credentials
+### 🧠 Intelligent Gmail Summarization using FastAPI, Groq LLM, LangGraph, and Next.js
+
+This project is a full-stack **Generative AI application** that securely connects to your Gmail inbox, retrieves your latest emails, and automatically summarizes them using **RAG (Retrieval-Augmented Generation)** and **Agentic AI** techniques.
+
+It combines real-time Gmail API integration, a LangGraph-based agent pipeline, and Groq’s LLM for accurate, structured summaries.
+
+---
+
+## 🚀 Features
+
+✅ **Google OAuth 2.0 Login**
+Authenticate with your Gmail account and securely access inbox data.
+
+✅ **Thread Summarization**
+Summarize any email thread with key points, actions, sentiment, and confidence.
+
+✅ **RAG Integration**
+Emails are indexed into a vector store for semantic retrieval across conversations.
+
+✅ **Agentic Pipeline**
+A LangGraph-inspired workflow controls multi-step logic — retrieve → summarize → plan.
+
+✅ **Beautiful Frontend (Next.js)**
+A simple and elegant UI to view and summarize your recent emails instantly.
+
+✅ **Persistent Storage (SQLite / PostgreSQL)**
+All summaries and user sessions are saved for later access and analytics.
+
+✅ **Groq-Powered Summarization**
+Ultra-fast summarization using `llama-3.1-8b-instant` on Groq.
+
+---
+
+## 🏗️ Architecture Overview
+
+```mermaid
+flowchart LR
+  subgraph User[Next.js UI]
+    TOKEN[app_token in localStorage]
+    THREADS[Inbox Threads View]
+    SUMM[Summarize Button]
+  end
+
+  subgraph API[FastAPI Backend]
+    AUTH[/Google OAuth/]
+    ME_THREADS[/GET /v1/me/threads/]
+    ME_SUMM[/POST /v1/me/summarize/]
+    RAG_IDX[/POST /v1/rag/index/thread/]
+    RAG_Q[/POST /v1/rag/search/]
+  end
+
+  subgraph Google[Google APIs]
+    OAUTH[Google OAuth 2.0]
+    GMAIL[Gmail API]
+  end
+
+  subgraph LLM[AI Engine]
+    GRAPH[Agent Graph\n(retrieve → summarize → plan)]
+    GROQ[Groq LLM]
+  end
+
+  subgraph Storage[Data Stores]
+    DB[(SQLite/Postgres)]
+    VDB[(Chroma Vector DB)]
+  end
+
+  User -->|Bearer token| ME_THREADS
+  User -->|Bearer token| ME_SUMM
+  User -->|OAuth login| AUTH
+  AUTH -->|tokens| DB
+  ME_THREADS -->|fetch threads| GMAIL
+  ME_SUMM -->|fetch + summarize| GMAIL
+  ME_SUMM -->|flatten text| GRAPH
+  GRAPH -->|LLM call| GROQ
+  GRAPH -->|output JSON| ME_SUMM
+  ME_SUMM -->|save summary| DB
+```
+
+---
+
+## 🧩 Tech Stack
+
+| Layer                | Technology                            |
+| -------------------- | ------------------------------------- |
+| **Frontend**         | Next.js 15 + Tailwind CSS             |
+| **Backend**          | FastAPI                               |
+| **LLM**              | Groq (LLaMA 3.1 8B Instant)           |
+| **Agent Pipeline**   | LangGraph-style Orchestration         |
+| **RAG Engine**       | ChromaDB + Sentence Transformers      |
+| **Auth**             | Google OAuth 2.0                      |
+| **Database**         | SQLite (dev) / PostgreSQL (prod)      |
+| **Deployment Ready** | Docker + Render / Railway / Cloud Run |
+
+---
+
+## ⚙️ Setup Instructions
+
+### 1️⃣ Clone the repo
+
+```bash
+git clone https://github.com/yourusername/email-summarizer-ai.git
+cd email-summarizer-ai
+```
+
+### 2️⃣ Create your virtual environment
+
+```bash
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
+### 3️⃣ Configure your `.env`
+
+Create a file `.env` in the backend root (`email-summarizer/`) and fill:
+
+```bash
+# === Groq ===
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=llama-3.1-8b-instant
+
+# === Gmail ===
+GMAIL_CREDENTIALS=credentials.json
+GMAIL_TOKEN=token.json
+
+# === OAuth (Web client from Google Cloud Console) ===
+GOOGLE_WEB_CREDENTIALS=web_credentials.json
+GOOGLE_OAUTH_REDIRECT_URI=http://127.0.0.1:8080/auth/google/callback
+
+# === UI ===
+UI_URL=http://localhost:3000
+
+# === Database ===
+DATABASE_URL=sqlite:///./data.db
+AUTH_ENABLED=true
+```
+
+---
+
+### 4️⃣ Enable Gmail API in Google Cloud Console
+
+* Go to [Google Cloud Console → APIs & Services](https://console.cloud.google.com/apis/dashboard)
+* Enable **Gmail API**
+* Create a **Web OAuth 2.0 Client ID**
+* Add Redirect URI → `http://127.0.0.1:8080/auth/google/callback`
+* Download credentials as `web_credentials.json`
+
+---
+
+### 5️⃣ Run the Backend
+
+```bash
+python -m uvicorn services.api.main:app --host 127.0.0.1 --port 8080 --reload
+```
+
+✅ You should see:
+
+```
+✅ Database initialized
+✅ Auth router mounted
+✅ CORS middleware enabled
+```
+
+---
+
+### 6️⃣ Run the Frontend
+
+From `/ui` folder:
+
+```bash
+npm install
+npm run dev
+```
+
+Visit: [http://localhost:3000](http://localhost:3000)
+
+---
+
+### 7️⃣ Sign in with Google
+
+* You’ll be redirected to Google login.
+* Approve Gmail access.
+* The UI will show your latest inbox threads.
+* Click **Summarize** to see structured summaries generated by the AI.
+
+---
+
+## 💾 Database Schema Overview
+
+| Table          | Purpose                  | Key Columns                                                                  |
+| -------------- | ------------------------ | ---------------------------------------------------------------------------- |
+| `users`        | Google users and tokens  | `google_user_id`, `email`, `token_json`                                      |
+| `app_sessions` | App token ↔ user mapping | `app_token`, `google_user_id`, `created_at`                                  |
+| `summaries`    | Stored AI summaries      | `id`, `google_user_id`, `thread_id`, `subject`, `summary_json`, `created_at` |
+
+---
+
+## 🧠 Agentic + RAG Flow
+
+| Step                            | Description                                          |
+| ------------------------------- | ---------------------------------------------------- |
+| 1️⃣ **Fetch Gmail Thread**      | Gmail API retrieves thread messages.                 |
+| 2️⃣ **Flatten Content**         | Extracts readable text, removes HTML.                |
+| 3️⃣ **RAG Indexing (Optional)** | Stores messages in vector DB for semantic retrieval. |
+| 4️⃣ **Agent Graph**             | Runs Retrieve → Summarize → Plan logic.              |
+| 5️⃣ **Groq Summarizer**         | Generates JSON summary with schema validation.       |
+| 6️⃣ **Save Result**             | Persists to `summaries` table.                       |
+
+---
+
+## 🧩 Example Summary Output
+
+```json
+{
+  "schema_version": "email_summary.v1",
+  "thread_id": "19a115c47c15cb2d",
+  "subject": "Advance Your Career with Azure OpenAI, Copilot, TensorFlow & PyTorch",
+  "participants": ["Simplilearn <updates@simplilearnmailer.com>"],
+  "dates": ["2025-10-24T04:37:19Z"],
+  "key_points": ["Advance your career with Azure OpenAI, Copilot, TensorFlow & PyTorch"],
+  "actions": [
+    {
+      "who": "Simplilearn",
+      "what": "Share Microsoft Certified AI Program details",
+      "priority": "low"
+    }
+  ],
+  "sentiment": "neutral",
+  "confidence": 0.8
+}
+```
+
+---
+
+## 🧩 Example Screenshots
+
+| Inbox View                    | Summary View                      |
+| ----------------------------- | --------------------------------- |
+| ![Inbox](docs/inbox-view.png) | ![Summary](docs/summary-view.png) |
+
+---
+
+## 🧭 Roadmap
+
+| Stage      | Description                      |
+| ---------- | -------------------------------- |
+| ✅ Phase 1  | Gmail fetch + summarization      |
+| ✅ Phase 2  | Groq LLM integration             |
+| ✅ Phase 3  | Agent Graph (LangGraph style)    |
+| ✅ Phase 4  | RAG-based retrieval              |
+| 🔜 Phase 5 | Multi-user dashboard             |
+| 🔜 Phase 6 | Auto-summary scheduler           |
+| 🔜 Phase 7 | Deploy on Render / GCP Cloud Run |
+
+---
+
+## 🧠 Future Upgrades
+
+* [ ] **Add semantic search (RAG queries)**
+* [ ] **Support Outlook integration**
+* [ ] **Multi-thread summarization**
+* [ ] **Integrate OpenAI GPT-4 Turbo as backup model**
+* [ ] **Add analytics dashboard**
+
+---
+
+## 🧑‍💻 Author
+
+**👤 Mandvi Dangi**
+📧 Email: `manvidangi09@gmail.com`
+💼 LinkedIn: [linkedin.com/in/mandvi-dangi](https://linkedin.com/in/mandvi-dangi)
+💻 Portfolio: *Generative AI | LLMs | Agentic Workflows | FastAPI | LangChain | Groq | Next.js*
+
+---
+
+## ⭐ If you liked this project…
+
+Give it a **star** ⭐ on GitHub and share feedback!
+It’s a complete, production-ready example of integrating **RAG + Agentic AI + Gmail API** — perfect for real-world AI automation.
+
