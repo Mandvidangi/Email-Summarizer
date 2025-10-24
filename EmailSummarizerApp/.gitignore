@@ -1,0 +1,20 @@
+﻿# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node / build
+node_modules/
+dist/
+build/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+
+# Secrets
+EmailSummarizerApp/email-summarizer/.env
+.env
